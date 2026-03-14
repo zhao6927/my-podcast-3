@@ -1,0 +1,27 @@
+name: Auto Update RSS
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install deps
+        run: pip install feedgen
+      - name: Run script
+        run: python generate_rss.py
+      - name: Commit RSS
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add podcast.xml
+          git commit -m "Update RSS" || exit 0
+          git push
